@@ -11,11 +11,14 @@
   (function() {
     new Promise(function(resolve, reject) {
       setTimeout(function() {
-        resolve('ok')
+        resolve('ok');
       }, 1000);
     }).then(function(message) {
       console.log(message);
       return 1;
+    }, function(err) {
+      console.log(err);
+      return 2;
     }).then(function(a) {
       console.log(a);
     })
