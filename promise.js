@@ -34,27 +34,25 @@
 	Promise.prototype.then = function(thenResolve, thenReject) {
 		var _this = this;
 		if (!isFunction(thenResolve)) {
-		    throw new TypeError('You must pass a thenResolver function as the first argument to the promise constructor');
+		    throw new TypeError('You must pass a thenResolver function as the first argument to the then prototype');
 		}
 		if (!isFunction(thenReject)) {
-		    throw new TypeError('You must pass a thenReject function as the first argument to the promise constructor');
+		    throw new TypeError('You must pass a thenReject function as the second argument to the then prototype');
 		}
-		Promise(function(resolve, reject) {
-			function callback(value) {
-				var ret = thenResolve(value);
-				if(typeof ret != 'undefined') {
-					resolve.call(this, ret);				
-				}
+		function callback(value) {
+			var ret = thenResolve(value);
+			if(typeof ret != 'undefined') {
+				_this.next.call(this, ret);				
 			}
-			function errback(value) {
-				var ret = thenReject(value);
-				if(typeof ret != 'undefined') {
-					reject.call(this, ret);
-				}
+		}
+		function errback(value) {
+			var ret = thenReject(value);
+			if(typeof ret != 'undefined') {
+				_this.next.call(this, ret);
 			}
-			_this.type == 'ok' ? _this.resolveArr.push(callback) : _this.rejectArr.push(errback)
-		});
+		}
+		this.type == 'ok' ? this.resolveArr.push(callback) : this.rejectArr.push(errback)
 		return this;
 	}
-
+	
 })(window)
