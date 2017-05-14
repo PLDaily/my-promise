@@ -7,6 +7,8 @@
 			throw new TypeError('Promise参数必须为函数');
 		}
 
+		if(!(this instanceof Promise)) return new Promise(func);
+
 		var that = this;
 		this.type = '';
 		this.resolveArr = [];
