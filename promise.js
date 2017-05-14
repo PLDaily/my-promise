@@ -2,57 +2,59 @@
 	var isFunction = function(obj) {
 		return typeof obj == 'function';
 	}
-
-	function Promise(resolver) {
-		if (!isFunction(resolver)) {
-		    throw new TypeError('You must pass a resolver function as the first argument to the promise constructor');
+	function Promise(func) {
+		if(!isFunction(func)) {
+			throw new TypeError('Promise参数必须为函数');
 		}
-		var _this = this;
-		this.type = 'ok';//ok为resolve；err为reject
+
+		var that = this;
+		this.type = '';
 		this.resolveArr = [];
 		this.rejectArr = [];
+
 		var resolve = function(value) {
-			_this.type = 'ok';
+			that.type = 'ok';
 			setTimeout(function() {
-				_this.next.call(_this, value, 'ok');
+				that.next.call(this, value, 'ok')
 			}, 0);
 		}
-		var reject = function(value) {
-			_this.type = 'err';
-			setTimeout(function() {
-				_this.next.call(this, value, 'err');
-			}, 0)
-		}
-		resolver(resolve, reject);
-	}
 
+		var reject = function(value) {
+			that.type = 'err';
+			setTimeout(function() {
+				that.next.call(this, value, 'err')
+			}, 0);
+		}
+
+		func(resolve, reject);
+
+	}
 	Promise.prototype.next = function(value, type) {
-		var fn = type == ok ? this.resolveArr.shift() : this.rejectArr.shift();
+		var fn = type == 'ok' ? this.resolveArr.shift() : this.rejectArr.shift();
 		fn&&fn(value);
 	}
-
 	Promise.prototype.then = function(thenResolve, thenReject) {
-		var _this = this;
-		if (!isFunction(thenResolve)) {
-		    throw new TypeError('You must pass a thenResolver function as the first argument to the then prototype');
+		if(!isFunction(thenResolve) || !isFunction(thenReject)) {
+			throw new TypeError('then参数必须为函数');
 		}
-		if (!isFunction(thenReject)) {
-		    throw new TypeError('You must pass a thenReject function as the second argument to the then prototype');
-		}
-		function callback(value) {
-			var ret = thenResolve(value);
-			if(typeof ret != 'undefined') {
-				_this.next.call(this, ret);				
+
+		var that = this;
+		var thenResolveCallback = function(value) {
+			var result = thenResolve(value);
+			if(typeof result != 'undefined') {
+				that.next.call(this, result, 'ok');
 			}
 		}
-		function errback(value) {
-			var ret = thenReject(value);
-			if(typeof ret != 'undefined') {
-				_this.next.call(this, ret);
+		var thenRejectCallback = function(value) {
+			var result = thenReject(value);
+			if(typeof result != 'undefined') {
+				that.next.call(this, result, 'err');
 			}
 		}
-		this.type == 'ok' ? this.resolveArr.push(callback) : this.rejectArr.push(errback)
+		this.type == 'ok' ? this.resolveArr.push(thenResolveCallback) : this.rejectArr.push(thenRejectCallback);
 		return this;
 	}
-	
+	Promise.prototype.catch = function(catchRejectCallabck) {
+		return this.then(undefined, catchRejectCallabck);
+	}
 })(window)
