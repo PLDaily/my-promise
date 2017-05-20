@@ -11,7 +11,7 @@
   (function() {
     new Promise(function(resolve, reject) {
       setTimeout(function() {
-        resolve('ok');
+        reject('err');
       }, 1000);
     }).then(function(message) {
       console.log(message);
@@ -19,7 +19,7 @@
     }, function(err) {
       console.log(err);
       return 2;
-    }).then(function(a) {
+    }).catch(function(a) {
       console.log(a);
     })
   })()
